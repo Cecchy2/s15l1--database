@@ -1,0 +1,73 @@
+******************Estrai tutti i clienti con nome Mario*****************
+
+SELECT * FROM public.clienti
+where nome= 'Mario'
+
+
+
+**************Estrarre il nome e il cognome dei clienti nati nel 1982****
+
+SELECT nome, cognome FROM public.clienti
+where annodinascita= 1982
+
+
+
+**************Estrarre il numero delle fatture con iva al 20%*************
+
+SELECT numerofattura FROM public.fatture
+where iva = 20
+
+
+
+***Estrarre i prodotti attivati nel 2017 e che sono in produzione oppure in commercio****
+
+SELECT descrizione FROM public.prodotti
+where extract(year from dataattivazione)= 2017 
+and datadisattivazione isnull
+
+
+
+******Estrarre le fatture con importo inferiore a 1000 e i dati dei clienti ad esse collegate*******
+
+SELECT f.*, c.nome, c.cognome 
+FROM public.fatture f
+join public.clienti c on f.idcliente = c.numerocliente
+where f.importo<1000;
+
+
+
+***Riportare l’elenco delle fatture (numero, importo, iva e data) con in aggiunta il nome del fornitore***
+
+SELECT f.numerofattura, f.importo, f.iva, f.datafattura, forn.Denominazione 
+FROM public.fatture f
+JOIN public.fornitori forn ON f.numerofornitore = forn.numerofornitore
+                    oppure
+JOIN public.fornitori forn USING (numerofornitore)
+
+
+
+**************Considerando soltanto le fatture con iva al 20 per cento, estrarre il numero di fatture per ogni anno (Per estrarre l’anno da una data si può usare EXTRACT(YEAR FROM data)****
+
+SELECT EXTRACT(YEAR FROM datafattura) AS anno, COUNT(*) AS numero_fatture
+FROM public.fatture
+WHERE iva = 20
+ORDER BY anno;
+
+
+******Riportare il numero di fatture e la somma dei relativi importi divisi per anno di fatturazione*******
+
+SELECT EXTRACT(YEAR FROM datafattura) AS annofattura, 
+       COUNT(*) AS numero_fatture, 
+       SUM(importo) AS totale_importo
+FROM public.fatture
+GROUP BY annofattura
+
+
+******Estrarre il totale degli importi delle fatture divisi per residenza dei clienti******
+
+SELECT c.regioneresidenza, 
+       SUM(f.importo) AS totale_importo
+FROM public.fatture f
+JOIN public.clienti c ON f.idcliente = c.numerocliente
+GROUP BY c.regioneresidenza
+ORDER BY totale_importo DESC;
